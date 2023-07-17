@@ -1,0 +1,6 @@
+me\minosuko\backpack\MySQLDB\MySQL.class
+me\minosuko\backpack\components\api\ItemAPI.class
+me\minosuko\backpack\components\manager\BackpackManager.class
+me\minosuko\backpack\Backpack.class
+me\minosuko\backpack\commands\BackpackCommand.class
+me\minosuko\backpack\components\api\ItemAPI$ItemWithSlot.class

@@ -1,0 +1,6 @@
+mysql:
+  ip: localhost
+  port: 3306
+  database: MinoBackpackSystem
+  username: root
+  password: 1234
