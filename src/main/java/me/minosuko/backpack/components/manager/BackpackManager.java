@@ -9,7 +9,6 @@ import com.nukkitx.fakeinventories.inventory.FakeSlotChangeEvent;
 import me.minosuko.backpack.Backpack;
 import me.minosuko.backpack.MySQLDB.MySQL;
 import me.minosuko.backpack.components.api.ItemAPI;
-import org.jetbrains.annotations.NotNull;
 
 import java.util.UUID;
 import java.util.HashMap;
@@ -20,16 +19,17 @@ public class BackpackManager {
 	private final Backpack plugin;
 	private final ItemAPI api;
 	private static UUID playerUUID = null;
+	private static String playerName = null;
 	
 	public BackpackManager(final Backpack plugin, final ItemAPI api) {
 		this.plugin = plugin;
 		this.api = api;
 	}
 
-	public void showBackpack(@NotNull Player player) {
+	public void showBackpack(Player player, IPlayer iplayer) {
 		String invString = null;
-		IPlayer target = player;
-		playerUUID = player.getUniqueId();
+		playerUUID = iplayer.getUniqueId();
+		playerName = iplayer.getName();
 		DoubleChestFakeInventory chestFakeInventory = new DoubleChestFakeInventory();
 		ResultSet rs = MySQL.getResult("SELECT * FROM `PlayerBackpack` WHERE `UUID` = '" + playerUUID + "'");
 		try {
@@ -39,32 +39,32 @@ public class BackpackManager {
 		} catch (SQLException throwables) {
 			invString = null;
 		}
-		if(!this.plugin.getBackpacks().containsKey(player.getName()) && invString != null) {
+		if(!this.plugin.getBackpacks().containsKey(playerName) && invString != null) {
 			final Map<Integer, Item> items = new HashMap<>();
 			this.api.inventoryFromString(invString).forEach(items::put);
 
 			chestFakeInventory.setContents(items);
-			this.plugin.getBackpacks().put(player.getName(), chestFakeInventory);
-		} else if(this.plugin.getBackpacks().containsKey(player.getName())) {
-			chestFakeInventory.setContents(this.plugin.getBackpacks().get(player.getName()).getContents());
+			this.plugin.getBackpacks().put(playerName, chestFakeInventory);
+		} else if(this.plugin.getBackpacks().containsKey(playerName)) {
+			chestFakeInventory.setContents(this.plugin.getBackpacks().get(playerName).getContents());
 		}
 		
 		chestFakeInventory.addListener(this::onFakeSlotChange);
-		chestFakeInventory.setName(player.getName() + "'s Backpack");
+		chestFakeInventory.setName(playerName + "'s Backpack");
 
 		player.addWindow(chestFakeInventory);
 	}
 
-	public void saveBackpacks(String playerName, Inventory inventory) {
+	public void saveBackpacks(Inventory inventory) {
 		MySQL.update("REPLACE INTO `PlayerBackpack` (`UUID`, `PlayerName`, `BackPackData`) VALUES ('" + playerUUID + "' , '" + playerName + "', '" + api.inventoryToString(inventory) + "')");
 	}
 
 	private void onFakeSlotChange(final FakeSlotChangeEvent event) {
-		if(!(this.plugin.getBackpacks().containsKey(event.getPlayer().getName()))) {
-			this.plugin.getBackpacks().put(event.getPlayer().getName(), event.getInventory());
+		if(!(this.plugin.getBackpacks().containsKey(playerName))) {
+			this.plugin.getBackpacks().put(playerName, event.getInventory());
 		} else {
-			this.plugin.getBackpacks().replace(event.getPlayer().getName(), this.plugin.getBackpacks().get(event.getPlayer().getName()), event.getInventory());
+			this.plugin.getBackpacks().replace(playerName, this.plugin.getBackpacks().get(playerName), event.getInventory());
 		}
-		this.saveBackpacks(event.getPlayer().getName(), event.getInventory());
+		this.saveBackpacks( event.getInventory());
 	}
 }
