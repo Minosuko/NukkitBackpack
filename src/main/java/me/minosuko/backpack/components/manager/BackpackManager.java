@@ -31,13 +31,13 @@ public class BackpackManager {
 		IPlayer target = player;
 		playerUUID = player.getUniqueId();
 		DoubleChestFakeInventory chestFakeInventory = new DoubleChestFakeInventory();
-		ResultSet rs = MySQL.getResult("SELECT * FROM `PlayerBackpack` WHERE `PlayerName` = '" + player.getName() + "'");
+		ResultSet rs = MySQL.getResult("SELECT * FROM `PlayerBackpack` WHERE `UUID` = '" + playerUUID + "'");
 		try {
 			if (rs.next()) {
 				invString = rs.getString("BackPackData");
 			}
 		} catch (SQLException throwables) {
-			throwables.printStackTrace();
+			invString = null;
 		}
 		if(!this.plugin.getBackpacks().containsKey(player.getName()) && invString != null) {
 			final Map<Integer, Item> items = new HashMap<>();
